@@ -1,5 +1,5 @@
 /**
- * KnNav v0.1.0 (2022-05-01 16:01:25 +0200)
+ * KnNav v0.1.0 (2022-05-01 16:14:47 +0200)
  * Copyright (c) 2022 Florent VIALATTE
  * Released under the MIT license
  */
@@ -770,8 +770,7 @@ const KnNav = function() {
 			}
 		}
 
-		let ctx = this || document;
-		GV.opt.selectors.forEach(selector => forEachEls(ctx.querySelectorAll(selector), el => parseDOM(el), ctx))
+		GV.opt.selectors.forEach(selector => forEachEls(document.querySelectorAll(selector), el => parseDOM(el), this));
 
 		trigger(document, "kn_nav:complete kn_nav:success", state.options);
 

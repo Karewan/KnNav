@@ -765,8 +765,7 @@ const KnNav = function() {
 			}
 		}
 
-		let ctx = this || document;
-		GV.opt.selectors.forEach(selector => forEachEls(ctx.querySelectorAll(selector), el => parseDOM(el), ctx))
+		GV.opt.selectors.forEach(selector => forEachEls(document.querySelectorAll(selector), el => parseDOM(el), this));
 
 		trigger(document, "kn_nav:complete kn_nav:success", state.options);
 
