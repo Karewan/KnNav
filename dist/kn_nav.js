@@ -1,11 +1,11 @@
 /**
- * KnNav v0.1.0 (2022-05-01 16:14:47 +0200)
+ * KnNav v0.2.0 (2022-05-04 21:21:37 +0200)
  * Copyright (c) 2022 Florent VIALATTE
  * Released under the MIT license
  */
 'use strict';
 const KnNav = function() {
-	const VERSION = '0.1.0',
+	const VERSION = '0.2.0',
 	GV = {
 		uuid_counter: 0,
 		attr_state: 'data-kn-nav-state',
@@ -23,20 +23,13 @@ const KnNav = function() {
 		console.log('KnNav.init()', opt);
 
 		if(!opt) opt = {};
-		if(!opt.elements) opt.elements = "a";
+		if(!opt.elements) opt.elements = ["a"];
 		if(!opt.selectors) opt.selectors = ["title", "#app"];
-		if(!opt.switches) opt.switches = {};
-		if(!opt.switches_options) opt.switches_options = {};
 		opt.history = (typeof opt.history === "undefined") ? true : opt.history;
 		if(!opt.one_page_history) opt.one_page_history = false;
-		opt.analytics = typeof opt.analytics === "function" || opt.analytics === false ? opt.analytics : defaultAnalytics;
-		opt.scroll_to = typeof opt.scroll_to === "undefined" ? 0 : opt.scroll_to;
 		opt.scroll_restoration = typeof opt.scroll_restoration !== "undefined" ? opt.scroll_restoration : true;
 		opt.cache_bust = typeof opt.cache_bust === "undefined" ? true : opt.cache_bust;
 		if(!opt.timeout) opt.timeout = 0;
-		if(!opt.current_url_full_reload) opt.current_url_full_reload = false;
-		if(!opt.switches.head) opt.switches.head = switchElementsAlt;
-		if(!opt.switches.body) opt.switches.body = switchElementsAlt;
 
 		if(opt.scroll_restoration && "scrollRestoration" in history) history.scrollRestoration = "manual";
 
@@ -58,7 +51,7 @@ const KnNav = function() {
 
 				GV.last_uid = st.state.uid;
 
-				loadUrl(st.state.url, opt);
+				navigate(st.state.url, opt);
 			}
 		});
 	}
@@ -119,38 +112,6 @@ const KnNav = function() {
 
 		old_el.outerHTML = new_el.outerHTML;
 		onSwitch();
-	}
-
-	/**
-	 * switchElementsAlt
-	 */
-	function switchElementsAlt(old_el, new_el) {
-		console.log('KnNav.switchElementsAlt()', old_el, new_el);
-
-		old_el.innerHTML = new_el.innerHTML;
-
-		if(new_el.hasAttributes()) {
-			let attrs = new_el.attributes;
-			for(let i = 0; i < attrs.length; i++) old_el.attributes.setNamedItem(attrs[i].cloneNode());
-		}
-
-		onSwitch();
-	}
-
-	/**
-	 * defaultAnalytics
-	 */
-	function defaultAnalytics() {
-		console.log('KnNav.defaultAnalytics()');
-
-		if(window._gaq) _gaq.push(["_trackPageview"]);
-
-		if(window.ga) ga("send", "pageview", {
-			page: location.pathname,
-			title: document.title
-		});
-
-		console.log(GV);
 	}
 
 	/**
@@ -259,21 +220,10 @@ const KnNav = function() {
 		console.log('KnNav.parseDOM()', el);
 
 		forEachEls(el.querySelectorAll(GV.opt.elements), el => {
-			switch(el.tagName.toLowerCase()) {
-				case "a":
-					if(!el.hasAttribute(GV.attr_state)) attachLink(el);
-					break;
-
-				case "form":
-					if(!el.hasAttribute(GV.attr_state)) {
-						let that = this;
-						el.setAttribute(GV.attr_state, "");
-						on(el, "submit", el => formAction.call(that, el, event));
-					}
-					break;
-
-				default:
-					throw "KnNav can only be applied on <a> or <form> submit";
+			if(el.tagName.toLowerCase() == 'a') {
+				if(!el.hasAttribute(GV.attr_state)) attachLink(el);
+			} else {
+				throw "KnNav can only be applied on <a>";
 			}
 		}, this);
 	}
@@ -300,7 +250,7 @@ const KnNav = function() {
 	function linkAction(el, event) {
 		console.log('KnNav.linkAction()', el, event);
 
-		if(isDefaultPrevented(event)) return;
+		if(event.defaultPrevented || event.returnValue === false) return;
 
 		let options = clone(GV.opt);
 
@@ -312,16 +262,10 @@ const KnNav = function() {
 
 		event.preventDefault();
 
-		if(GV.opt.current_url_full_reload && el.href === window.location.href.split("#")[0]) {
-			el.setAttribute(GV.attr_state, "reload");
-			reload();
-			return;
-		}
-
 		el.setAttribute(GV.attr_state, "load");
 
 		options.trigger_element = el;
-		loadUrl(el.href, options);
+		navigate(el.href, options);
 	}
 
 	/**
@@ -337,14 +281,6 @@ const KnNav = function() {
 	}
 
 	/**
-	 * isDefaultPrevented
-	 */
-	function isDefaultPrevented(event) {
-		console.log('KnNav.isDefaultPrevented()', event);
-		return event.defaultPrevented || event.returnValue === false;
-	}
-
-	/**
 	 * attachLink
 	 */
 	function attachLink(el) {
@@ -353,112 +289,6 @@ const KnNav = function() {
 		let that = this;
 		el.setAttribute(GV.attr_state, "");
 		on(el, "click", event => linkAction.call(that, el, event));
-		on(el, "keyup", event => {
-			if(event.keyCode === 13) linkAction.call(that, el, event);
-		});
-	}
-
-	/**
-	 * formAction
-	 */
-	function formAction(el, event) {
-		console.log('KnNav.formAction()', el, event);
-
-		if(isDefaultPrevented(event)) return;
-
-		let options = clone(GV.opt);
-		options.request_options = {
-			requestUrl: el.getAttribute("action") || window.location.href,
-			requestMethod: el.getAttribute("method") || "GET"
-		};
-
-		let virtlink_element = document.createElement("a");
-		virtlink_element.setAttribute("href", options.request_options.requestUrl);
-
-		let attr_value = checkIfShouldAbortFormAction(virtlink_element, options);
-		if(attr_value) {
-			el.setAttribute(GV.attr_state, attr_value);
-			return;
-		}
-
-		event.preventDefault();
-
-		if(el.enctype === "multipart/form-data") options.request_options.formData = new FormData(el);
-		else options.request_options.requestParams = parseFormElements(el);
-
-		el.setAttribute(GV.attr_state, "submit");
-
-		options.trigger_element = el;
-		loadUrl(virtlink_element.href, options);
-	}
-
-	/**
-	 * checkIfShouldAbortFormAction
-	 */
-	function checkIfShouldAbortFormAction(virtlinkelement, options) {
-		console.log('KnNav.checkIfShouldAbortFormAction()', virtlinkelement, options);
-
-		if(virtlinkelement.protocol !== window.location.protocol
-			|| virtlinkelement.host !== window.location.host) {
-
-			return "external";
-		}
-
-		if(virtlinkelement.hash
-			&& virtlinkelement.href.replace(virtlinkelement.hash, "") === window.location.href.replace(location.hash, "")) {
-
-			return "anchor";
-		}
-
-		if(virtlinkelement.href === window.location.href.split("#")[0] + "#") {
-			return "anchor-empty";
-		}
-
-		if(options.current_url_full_reload
-			&& virtlinkelement.href === window.location.href.split("#")[0]) {
-
-			return "reload";
-		}
-	}
-
-	/**
-	 * parseFormElements
-	 */
-	function parseFormElements(el) {
-		console.log('KnNav.parseFormElements()', el);
-
-		let request_params = [],
-		form_elements = el.elements;
-
-		for(let i = 0; i < form_elements.length; i++) {
-			let element = form_elements[i],
-			tag_name = element.tagName.toLowerCase();
-
-			if(!!element.name && element.attributes !== undefined && tag_name !== "button") {
-				let type = element.attributes.type;
-
-				if(!type || (type.value !== "checkbox" && type.value !== "radio") || element.checked) {
-					let values = [];
-
-					if(tag_name === "select") {
-						let opt;
-						for(let j = 0; j < element.options.length; j++) {
-							opt = element.options[j];
-							if(opt.selected && !opt.disabled) values.push(opt.hasAttribute("value") ? opt.value : opt.text);
-						}
-					} else {
-						values.push(element.value);
-					}
-
-					for(let k = 0; k < values.length; k++) request_params.push({
-						name: encodeURIComponent(element.name),
-						value: encodeURIComponent(values[k])
-					});
-				}
-			}
-		}
-
-		return request_params;
 	}
 
 	/**
@@ -487,21 +317,7 @@ const KnNav = function() {
 			forEachEls(
 				new_els,
 				function(new_el, i) {
-					let old_el = old_els[i];
-
-					console.log("new_el", new_el, "old_el", old_el);
-
-					let callback = GV.opt.switches[selector]
-						? GV.opt.switches[selector].bind(
-							this,
-							old_el,
-							new_el,
-							options,
-							GV.opt.switches_options[selector]
-						)
-						: outerHTML.bind(this, old_el, new_el, options);
-
-					switches_queue.push(callback);
+					switches_queue.push(outerHTML.bind(this, old_els[i], new_el, options));
 				},
 				this
 			);
@@ -556,7 +372,7 @@ const KnNav = function() {
 		console.log("load content", tmp_el.documentElement.attributes, tmp_el.documentElement.innerHTML.length);
 
 		// Clear out any focused controls before inserting new page contents.
-		if(document.activeElement && contains(document, GV.opt.selectors, document.activeElement)) {
+		if(document.activeElement) {
 			try {
 				document.activeElement.blur();
 			} catch (e) {
@@ -579,34 +395,12 @@ const KnNav = function() {
 	}
 
 	/**
-	 * updateQueryString
-	 */
-	function updateQueryString(uri, key, value) {
-		console.log('KnNav.updateQueryString()', uri, key, value);
-
-		let re = new RegExp("([?&])" + key + "=.*?(&|$)", "i"),
-		separator = uri.indexOf("?") !== -1 ? "&" : "?";
-
-		if(uri.match(re)) return uri.replace(re, "$1" + key + "=" + value + "$2");
-		else return uri + separator + key + "=" + value;
-	}
-
-	/**
 	 * doRequest
 	 */
 	function doRequest(location, options, callback) {
 		console.log('KnNav.doRequest()', location, options, callback);
 
-		options = options || {};
-
-		let query_string,
-		request_options = options.request_options || {},
-		request_method = (request_options.requestMethod || "GET").toUpperCase(),
-		request_params = request_options.requestParams || null,
-		form_data = request_options.formData || null,
-		request_payload = null,
-		request = new XMLHttpRequest(),
-		timeout = options.timeout || 0;
+		const request = new XMLHttpRequest();
 
 		request.onreadystatechange = () => {
 			if(request.readyState === 4) {
@@ -615,37 +409,20 @@ const KnNav = function() {
 			}
 		};
 
-		request.onerror = e => callback(null, request, location, options)
+		request.onerror = e => callback(null, request, location, options);
 
 		request.ontimeout = () => callback(null, request, location, options);
 
-		if(request_params && request_params.length) {
-			query_string = request_params.map(param => param.name + "=" + param.value).join("&");
-
-			switch(request_method) {
-				case "GET":
-					location = location.split("?")[0];
-					location += "?" + query_string;
-					break;
-
-				case "POST":
-					request_payload = query_string;
-					break;
-			}
-		} else if(form_data) {
-			request_payload = form_data;
+		if(options.cache_bust) {
+			const url = new URL(location);
+			url.searchParams.set('t', Date.now());
+			location = url.toString();
 		}
 
-		if(options.cache_bust) location = updateQueryString(location, "t", Date.now());
-
-		request.open(request_method, location, true);
-		request.timeout = timeout;
+		request.open('GET', location, true);
+		request.timeout = options.timeout || 270000;
 		request.setRequestHeader('X-Requested-With', 'KnNav');
-
-		if(request_payload && request_method === "POST" && !form_data) request.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
-
-		request.send(request_payload);
-
+		request.send(null);
 		return request;
 	}
 
@@ -706,10 +483,10 @@ const KnNav = function() {
 	}
 
 	/**
-	 * loadUrl
+	 * navigate
 	 */
-	function loadUrl(href, options) {
-		console.log('KnNav.loadUrl()', href, options);
+	function navigate(href, options) {
+		console.log('KnNav.navigate()', href, options);
 		options = typeof options === "object" ? extend({}, GV.opt, options) : clone(GV.opt);
 		abortRequest(GV.request);
 		trigger(document, "kn_nav:send", options);
@@ -774,8 +551,6 @@ const KnNav = function() {
 
 		trigger(document, "kn_nav:complete kn_nav:success", state.options);
 
-		if(typeof state.options.analytics === "function") state.options.analytics();
-
 		if(state.options.history) {
 			let a = document.createElement("a");
 			a.href = GV.state.href;
@@ -793,9 +568,6 @@ const KnNav = function() {
 				} while (target);
 
 				window.scrollTo(0, curtop);
-			} else if(state.options.scroll_to !== false) {
-				if(state.options.scroll_to.length > 1) window.scrollTo(state.options.scrollTo[0], state.options.scrollTo[1]);
-				else window.scrollTo(0, state.options.scroll_to);
 			}
 		} else if(state.options.scroll_restoration && state.options.scroll_pos) {
 			window.scrollTo(state.options.scroll_pos[0], state.options.scroll_pos[1]);
@@ -815,7 +587,7 @@ const KnNav = function() {
 	return {
 		VERSION,
 		init,
-		loadUrl,
+		navigate,
 		reload,
 		refresh
 	}
