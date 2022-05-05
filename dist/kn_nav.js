@@ -1,11 +1,11 @@
 /**
- * KnNav v0.2.0 (2022-05-04 21:21:37 +0200)
+ * KnNav v0.3.0 (2022-05-05 19:47:36 +0200)
  * Copyright (c) 2022 Florent VIALATTE
  * Released under the MIT license
  */
 'use strict';
 const KnNav = function() {
-	const VERSION = '0.2.0',
+	const VERSION = '0.3.0',
 	GV = {
 		uuid_counter: 0,
 		attr_state: 'data-kn-nav-state',
@@ -61,7 +61,6 @@ const KnNav = function() {
 	 */
 	function newUid() {
 		console.log('KnNav.newUid()');
-
 		return "kn_nav_" + new Date().getTime() + "_" + GV.uuid_counter++;
 	}
 
@@ -350,26 +349,8 @@ const KnNav = function() {
 			return;
 		}
 
-		let tmp_el = document.implementation.createHTMLDocument("kn_nav"),
-		html_regex = /<html[^>]+>/gi,
-		html_attribs_regex = /\s?[a-z:]+(?:=['"][^'">]+['"])*/gi,
-		matches = html.match(html_regex);
-
-		if(matches && matches.length) {
-			matches = matches[0].match(html_attribs_regex);
-			if(matches.length) {
-				matches.shift();
-				matches.forEach(function(htmlAttrib) {
-					let attr = htmlAttrib.trim().split("=");
-
-					if(attr.length === 1) tmp_el.documentElement.setAttribute(attr[0], true);
-					else tmp_el.documentElement.setAttribute(attr[0], attr[1].slice(1, -1));
-				});
-			}
-		}
-
+		let tmp_el = document.implementation.createHTMLDocument("kn_nav");
 		tmp_el.documentElement.innerHTML = html;
-		console.log("load content", tmp_el.documentElement.attributes, tmp_el.documentElement.innerHTML.length);
 
 		// Clear out any focused controls before inserting new page contents.
 		if(document.activeElement) {
@@ -499,12 +480,9 @@ const KnNav = function() {
 	function afterAllSwitches() {
 		console.log('KnNav.afterAllSwitches()');
 
-		let autofocus_el = Array.prototype.slice.call(document.querySelectorAll("[autofocus]")).pop();
+		let state = GV.state,
+		autofocus_el = Array.prototype.slice.call(document.querySelectorAll("[autofocus]")).pop();
 		if(autofocus_el && document.activeElement !== autofocus_el) autofocus_el.focus();
-
-		GV.opt.selectors.forEach(selector => forEachEls(document.querySelectorAll(selector), el => executeScripts(el)));
-
-		let state = GV.state;
 
 		if(state.options.history) {
 			if(!window.history.state) {
@@ -547,9 +525,11 @@ const KnNav = function() {
 			}
 		}
 
-		GV.opt.selectors.forEach(selector => forEachEls(document.querySelectorAll(selector), el => parseDOM(el), this));
-
 		trigger(document, "kn_nav:complete kn_nav:success", state.options);
+
+		GV.opt.selectors.forEach(selector => forEachEls(document.querySelectorAll(selector), el => executeScripts(el)));
+
+		GV.opt.selectors.forEach(selector => forEachEls(document.querySelectorAll(selector), el => parseDOM(el), this));
 
 		if(state.options.history) {
 			let a = document.createElement("a");
