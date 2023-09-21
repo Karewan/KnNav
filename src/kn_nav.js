@@ -1,6 +1,6 @@
 'use strict';
 const KnNav = function() {
-	const VERSION = '0.3.0',
+	const VERSION = '0.4.0',
 	GV = {
 		uuid_counter: 0,
 		attr_state: 'data-kn-nav-state',
@@ -19,7 +19,7 @@ const KnNav = function() {
 
 		if(!opt) opt = {};
 		if(!opt.elements) opt.elements = ["a"];
-		if(!opt.selectors) opt.selectors = ["title", "#app"];
+		if(!opt.selectors) opt.selectors = ["head title", "#app"];
 		opt.history = (typeof opt.history === "undefined") ? true : opt.history;
 		if(!opt.one_page_history) opt.one_page_history = false;
 		opt.scroll_restoration = typeof opt.scroll_restoration !== "undefined" ? opt.scroll_restoration : true;
@@ -170,22 +170,6 @@ const KnNav = function() {
 			if(opts) Object.keys(opts).forEach(key => event[key] = opts[key]);
 			forEachEls(els, el => el.dispatchEvent(event));
 		});
-	}
-
-	/**
-	 * contains
-	 */
-	function contains(doc, selectors, el) {
-		console.log('KnNav.contains()', doc, selectors, el);
-
-		for(let i = 0; i < selectors.length; i++) {
-			let selected_els = doc.querySelectorAll(selectors[i]);
-			for(let j = 0; j < selected_els.length; j++) {
-				if(selected_els[j].contains(el)) return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**
