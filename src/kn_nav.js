@@ -1,6 +1,6 @@
 'use strict';
 const KnNav = function() {
-	const VERSION = '0.4.0',
+	const VERSION = '0.5.0',
 	GV = {
 		uuid_counter: 0,
 		attr_state: 'data-kn-nav-state',
@@ -21,12 +21,12 @@ const KnNav = function() {
 		if(!opt.elements) opt.elements = ["a"];
 		if(!opt.selectors) opt.selectors = ["head title", "#app"];
 		opt.history = (typeof opt.history === "undefined") ? true : opt.history;
-		if(!opt.one_page_history) opt.one_page_history = false;
-		opt.scroll_restoration = typeof opt.scroll_restoration !== "undefined" ? opt.scroll_restoration : true;
-		opt.cache_bust = typeof opt.cache_bust === "undefined" ? true : opt.cache_bust;
+		if(!opt.onePageHistory) opt.onePageHistory = false;
+		opt.scrollRestoration = typeof opt.scrollRestoration !== "undefined" ? opt.scrollRestoration : true;
+		opt.cacheBust = typeof opt.cacheBust === "undefined" ? true : opt.cacheBust;
 		if(!opt.timeout) opt.timeout = 0;
 
-		if(opt.scroll_restoration && "scrollRestoration" in history) history.scrollRestoration = "manual";
+		if(opt.scrollRestoration && "scrollRestoration" in history) history.scrollRestoration = "manual";
 
 		GV.max_uid = GV.last_uid = newUid();
 		GV.opt = opt;
@@ -373,7 +373,7 @@ const KnNav = function() {
 
 		request.ontimeout = () => callback(null, request, location, options);
 
-		if(options.cache_bust) {
+		if(options.cacheBust) {
 			const url = new URL(location);
 			url.searchParams.set('t', Date.now());
 			location = url.toString();
@@ -479,7 +479,7 @@ const KnNav = function() {
 
 			GV.last_uid = GV.max_uid = newUid();
 
-			if(state.options.one_page_history) {
+			if(state.options.onePageHistory) {
 				window.history.replaceState(
 					{
 						url: state.href,
@@ -528,7 +528,7 @@ const KnNav = function() {
 
 				window.scrollTo(0, curtop);
 			}
-		} else if(state.options.scroll_restoration && state.options.scroll_pos) {
+		} else if(state.options.scrollRestoration && state.options.scroll_pos) {
 			window.scrollTo(state.options.scroll_pos[0], state.options.scroll_pos[1]);
 		}
 

@@ -1,0 +1,13 @@
+KnNav Changelog
+==========
+
+0.5.0 (2023-12-16):
+----------------------------
+* Breaking changes
+	* **one_page_history** option renamed **onePageHistory**
+	* **scroll_restoration** option renamed **scrollRestoration**
+	* **cache_bust** option renamed **cacheBust**
+
+0.4.0 (2023-09-21)
+----------------------------
+* Missing changelog...

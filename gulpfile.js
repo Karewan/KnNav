@@ -5,24 +5,22 @@ terser = require('gulp-terser'),
 header_comment = require('gulp-header-comment');
 
 const terser_options = {
-	ecma: '2015',
-	ie8: false,
-	safari10: false,
+	ecma: '2020',
 	compress: {
-		ecma: '2015',
+		ecma: '2020',
 		drop_console: true,
 		drop_debugger: true,
 		passes: 2
 	},
 	format: {
 		comments: false,
-		ecma: '2015',
+		ecma: '2020',
 		quote_style: 3
 	}
 },
 header_txt= `
 	KnNav v<%= pkg.version %> (<%= moment().format('YYYY-MM-DD HH:mm:ss ZZ') %>)
-	Copyright (c) <%= moment().format('YYYY') %> <%= pkg.author %>
+	Copyright (c) 2022 - <%= moment().format('YYYY') %> <%= pkg.author %>
 	Released under the MIT license
 `;
 
