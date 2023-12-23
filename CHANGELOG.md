@@ -1,6 +1,10 @@
 KnNav Changelog
 ==========
 
+0.5.1 (2023-12-23):
+----------------------------
+* Use Object.assign to set default options
+
 0.5.0 (2023-12-16):
 ----------------------------
 * Breaking changes

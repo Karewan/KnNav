@@ -1,11 +1,11 @@
 /**
- * KnNav v0.5.0 (2023-12-16 14:52:49 +0100)
+ * KnNav v0.5.1 (2023-12-23 16:10:44 +0100)
  * Copyright (c) 2022 - 2023 Florent VIALATTE
  * Released under the MIT license
  */
 'use strict';
 const KnNav = function() {
-	const VERSION = '0.5.0',
+	const VERSION = '0.5.1',
 	GV = {
 		uuid_counter: 0,
 		attr_state: 'data-kn-nav-state',
@@ -22,19 +22,19 @@ const KnNav = function() {
 	function init(opt) {
 		console.log('KnNav.init()', opt);
 
-		if(!opt) opt = {};
-		if(!opt.elements) opt.elements = ["a"];
-		if(!opt.selectors) opt.selectors = ["head title", "#app"];
-		opt.history = (typeof opt.history === "undefined") ? true : opt.history;
-		if(!opt.onePageHistory) opt.onePageHistory = false;
-		opt.scrollRestoration = typeof opt.scrollRestoration !== "undefined" ? opt.scrollRestoration : true;
-		opt.cacheBust = typeof opt.cacheBust === "undefined" ? true : opt.cacheBust;
-		if(!opt.timeout) opt.timeout = 0;
+		GV.opt = Object.assign({
+			elements: ["a"],
+			selectors: ["head title", "#app"],
+			history: true,
+			onePageHistory: false,
+			scrollRestoration: true,
+			cacheBust: true,
+			timeout: 0
+		}, opt || {});
 
 		if(opt.scrollRestoration && "scrollRestoration" in history) history.scrollRestoration = "manual";
 
 		GV.max_uid = GV.last_uid = newUid();
-		GV.opt = opt;
 
 		parseDOM(document);
 
