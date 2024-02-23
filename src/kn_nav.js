@@ -1,6 +1,6 @@
 'use strict';
 const KnNav = function() {
-	const VERSION = '0.5.1',
+	const VERSION = '0.5.2',
 	GV = {
 		uuid_counter: 0,
 		attr_state: 'data-kn-nav-state',
@@ -394,6 +394,12 @@ const KnNav = function() {
 
 		options = clone(options || GV.opt);
 		options.request = request;
+
+		let extRedirect = request.getResponseHeader('Kn-Redirect');
+		if(extRedirect) {
+			location.href = extRedirect;
+			return;
+		}
 
 		if(response_text === false) {
 			trigger(document, "kn_nav:complete kn_nav:error", options);

@@ -1,6 +1,10 @@
 KnNav Changelog
 ==========
 
+0.5.2 (2024-02-23):
+----------------------------
+* Kn-Redirect header to force a redirect
+
 0.5.1 (2023-12-23):
 ----------------------------
 * Use Object.assign to set default options

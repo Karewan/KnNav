@@ -1,11 +1,11 @@
 /**
- * KnNav v0.5.1 (2023-12-23 16:10:44 +0100)
- * Copyright (c) 2022 - 2023 Florent VIALATTE
+ * KnNav v0.5.2 (2024-02-23 14:19:59 +0100)
+ * Copyright (c) 2022 - 2024 Florent VIALATTE
  * Released under the MIT license
  */
 'use strict';
 const KnNav = function() {
-	const VERSION = '0.5.1',
+	const VERSION = '0.5.2',
 	GV = {
 		uuid_counter: 0,
 		attr_state: 'data-kn-nav-state',
@@ -399,6 +399,12 @@ const KnNav = function() {
 
 		options = clone(options || GV.opt);
 		options.request = request;
+
+		let extRedirect = request.getResponseHeader('Kn-Redirect');
+		if(extRedirect) {
+			location.href = extRedirect;
+			return;
+		}
 
 		if(response_text === false) {
 			trigger(document, "kn_nav:complete kn_nav:error", options);
