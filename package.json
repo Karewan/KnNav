@@ -1,11 +1,57 @@
 {
-	"name": "kn-nav",
+	"name": "@karewan/kn-nav",
 	"author": "Florent VIALATTE",
-	"version": "0.5.2",
+	"version": "1.0.0",
+	"description": "Ajax navigation library (pjax like) for vanilla JS and legacy server-rendered projects that do not use a modern framework like Vue or React, based on KnHttpJs, written in TypeScript",
+	"main": "./dist/kn-nav.js",
+	"module": "./dist/kn-nav.js",
+	"types": "./dist/types/kn-nav.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/types/kn-nav.d.ts",
+			"import": "./dist/kn-nav.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"files": [
+		"dist"
+	],
+	"sideEffects": false,
+	"type": "module",
+	"license": "MIT",
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit && tsc -p tsconfig.node.json && tsc -p samples/tsconfig.json",
+		"build": "tsc --noEmit && tsc -p tsconfig.node.json && vite build && tsc",
+		"dev": "vite build --watch",
+		"samples": "vite --config samples/vite.config.ts"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Karewan/KnNav.git"
+	},
+	"homepage": "https://github.com/Karewan/KnNav#readme",
+	"bugs": {
+		"url": "https://github.com/Karewan/KnNav/issues"
+	},
+	"keywords": [
+		"navigation",
+		"ajax",
+		"pjax",
+		"history",
+		"vanilla",
+		"legacy",
+		"typescript"
+	],
+	"peerDependencies": {
+		"kn-http": "^4.0.0"
+	},
 	"devDependencies": {
-		"gulp": "^4.0.2",
-		"gulp-header-comment": "^0.9.0",
-		"gulp-rename": "^2.0.0",
-		"gulp-terser": "^2.0.1"
+		"@types/node": "^24.13.6",
+		"kn-http": "^4.0.0",
+		"typescript": "~6.0.3",
+		"vite": "^8.3.0"
 	}
 }
